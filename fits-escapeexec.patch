@@ -1,0 +1,100 @@
+From 354854c07941b5c2d406ffcd77414381098caae4 Mon Sep 17 00:00:00 2001
+From: Rosie Le Faive <lefaive@gmail.com>
+Date: Wed, 7 Jun 2017 21:54:45 -0300
+Subject: [PATCH] Escape shell commands.
+
+---
+ includes/admin.form.inc  | 36 ++++--------------------------------
+ includes/derivatives.inc |  6 +++---
+ 2 files changed, 7 insertions(+), 35 deletions(-)
+
+diff --git a/includes/admin.form.inc b/includes/admin.form.inc
+index 7c792c6..b2d78e4 100644
+--- a/includes/admin.form.inc
++++ b/includes/admin.form.inc
+@@ -11,16 +11,15 @@
+  * @see drupal_get_form
+  */
+ function islandora_fits_admin_form($form, $form_state) {
+-  if (isset($form_state['triggering_element'])) {
+-    // Textfield AJAX callback.
+-    if ($form_state['triggering_element']['#name'] == 'islandora_fits_path_textfield') {
++  module_load_include('inc', 'islandora', 'includes/utilities');
++  // Textfield AJAX callback.
++  if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#name'] == 'islandora_fits_path_textfield') {
+       $fits_path = $form_state['input']['islandora_fits_path_textfield'];
+-    }
+   }
+   else {
+     $fits_path = variable_get('islandora_fits_executable_path', 'fits.sh');
+   }
+-  $conf_message = islandora_fits_path_check($fits_path);
++  $conf_message = islandora_executable_available_message($fits_path);
+   $form['islandora_fits_wrapper'] = array(
+     '#prefix' => '<div id="islandora_fits_wrapper">',
+     '#suffix' => '</div>',
+@@ -77,30 +76,3 @@ function islandora_fits_path_ajax($form, $form_state) {
+   return $form['islandora_fits_wrapper'];
+ }
+ 
+-/**
+- * Checks a fits path for the executable. 
+- */
+-function islandora_fits_path_check($fits_path) {
+-  module_load_include('inc', 'islandora', 'includes/utilities');
+-  $output = array();
+-  $return_value = '';
+-
+-  $command = 'stat ' . $fits_path;
+-
+-  // Ensure that this is a Windows server and that $fits_path isn't
+-  // pointing to a shell script (that combo may cause the page to hang).
+-  if ((islandora_deployed_on_windows()) && (strpos($fits_path, ".sh") === FALSE)) {
+-    // Validate FITS by requesting version info instead.
+-    $command = $fits_path . ' -v';
+-  }
+-
+-  exec($command, $output, $return_value);
+-
+-  if ($return_value !== 0) {
+-    $confirmation_message = '<img src="' . url('misc/watchdog-error.png') . '"/>' . t('Unable to locate the File Information Tool Set at @fitspath', array('@fitspath' => $fits_path));
+-  }
+-  else {
+-    $confirmation_message = '<img src="' . url('misc/watchdog-ok.png') . '"/>' . t('File Information Tool Set found at @fitspath', array('@fitspath' => $fits_path));
+-  }
+-  return $confirmation_message;
+-}
+diff --git a/includes/derivatives.inc b/includes/derivatives.inc
+index 7a71795..559a33d 100644
+--- a/includes/derivatives.inc
++++ b/includes/derivatives.inc
+@@ -79,7 +79,7 @@ function islandora_fits_create_fits($file) {
+   $output = array();
+   $outfile = "{$file}.tech.xml";
+   $fits = variable_get('islandora_fits_executable_path', 'fits.sh');
+-  $command = "$fits -i $file -xc -o $outfile";
++  $command = escapeshellcmd("$fits -i $file -xc -o $outfile");
+   exec($command, $output, $ret);
+   if ($ret == '0') {
+     if (islandora_fits_verify_fits_xml($outfile)) {
+@@ -88,7 +88,7 @@ function islandora_fits_create_fits($file) {
+   }
+   $output = array();
+   // It failed, lets try a simpler command (-x instead of -xc).
+-  $command = "$fits -i $file -x -o $outfile";
++  $command = escapeshellcmd("$fits -i $file -x -o $outfile");
+   exec($command, $output, $ret);
+   if ($ret == '0') {
+     if (islandora_fits_verify_fits_xml($outfile)) {
+@@ -97,7 +97,7 @@ function islandora_fits_create_fits($file) {
+   }
+   $output = array();
+   // In case of disaster, fall back to the simplest possibly command line.
+-  $command = "$fits -i $file -o $outfile";
++  $command = escapeshellcmd("$fits -i $file -o $outfile");
+   exec($command, $output, $ret);
+   if ($ret == '0') {
+     if (islandora_fits_verify_fits_xml($outfile)) {
+-- 
+2.9.3 (Apple Git-75)
+

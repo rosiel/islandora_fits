@@ -76,9 +76,16 @@ function islandora_fits_create_techmd(AbstractObject $object, $force = FALSE, $h
  *   A URI to the generated derivative if successful, FALSE otherwise.
  */
 function islandora_fits_create_fits($file) {
+  module_load_include('inc', 'islandora_fits', '/includes/utilities');
   $output = array();
   $outfile = "{$file}.tech.xml";
   $fits = variable_get('islandora_fits_executable_path', 'fits.sh');
+  // Validate path before running derivatives.
+  $path_errors = islandora_fits_path_check($fits);
+  if (!empty($path_errors)) {
+    watchdog('islandora_fits', array_merge($path_errors));
+    return FALSE;
+  }
   $command = "$fits -i $file -xc -o $outfile";
   exec($command, $output, $ret);
   if ($ret == '0') {
