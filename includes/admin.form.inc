@@ -107,11 +107,9 @@ function islandora_fits_path_ajax($form, $form_state) {
 function islandora_fits_get_path_message($fits_path) {
   module_load_include('inc', 'islandora_fits', '/includes/utilities');
   $errors = islandora_fits_path_check($fits_path);
+  $version = NULL;
   if (empty($errors)) {
-    $confirmation_message = '<img src="' . url('misc/watchdog-ok.png') . '"/> ' . t('Executable found at @fitspath', array('@fitspath' => $fits_path));
+    $version = exec($fits_path . ' -v', $output, $return);
   }
-  else {
-    $confirmation_message = '<img src="' . url('misc/watchdog-error.png') . '"/> ' . implode('<br/>', $errors);
-  }
-  return $confirmation_message;
+  return islandora_executable_available_markup($errors, $fits_path, $version);
 }
