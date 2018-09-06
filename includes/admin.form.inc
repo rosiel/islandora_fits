@@ -24,7 +24,7 @@ function islandora_fits_admin_form($form, $form_state) {
   else {
     $fits_path = variable_get('islandora_fits_executable_path', 'fits.sh');
   }
-  $conf_message = islandora_fits_get_path_message($fits_path);
+  $conf_message = islandora_fits_get_fits_path_validation_message($fits_path);
   $form['islandora_fits_do_derivatives'] = array(
     '#type' => 'checkbox',
     '#title' => t('Run Islandora FITS derivatives locally'),
@@ -41,7 +41,7 @@ function islandora_fits_admin_form($form, $form_state) {
     '#type' => 'textfield',
     '#title' => t('System path to FITS processor'),
     '#name' => 'islandora_fits_path_textfield',
-    '#description' => t('The complete path and filename of the File Information Tool Set (FITS) binary, or the command to run if in the path.'),
+    '#description' => t('The complete path and filename of the File Information Tool Set (FITS) binary, or the command to run if in the path. Defaults to <em>fits.sh</em>.'),
     '#default_value' => $fits_path,
     '#ajax' => array(
       'callback' => 'islandora_fits_path_ajax',
@@ -104,12 +104,13 @@ function islandora_fits_path_ajax($form, $form_state) {
 /**
  * Gets a user-friendly message to show whether the path is valid.
  */
-function islandora_fits_get_path_message($fits_path) {
+function islandora_fits_get_fits_path_validation_message($fits_path) {
   module_load_include('inc', 'islandora_fits', '/includes/utilities');
-  $errors = islandora_fits_path_check($fits_path);
-  $version = NULL;
+  $errors = islandora_fits_validate_path_to_fits($fits_path);
+  $version_string = NULL;
   if (empty($errors)) {
     $version = exec($fits_path . ' -v', $output, $return);
+    $version_string = t("Version: @version", array('@version' => $version));
   }
-  return islandora_executable_available_markup($errors, $fits_path, $version);
+  return islandora_get_path_validation_markup($errors, $fits_path, $version_string);
 }

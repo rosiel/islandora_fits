@@ -81,7 +81,7 @@ function islandora_fits_create_fits($file) {
   $outfile = "{$file}.tech.xml";
   $fits = variable_get('islandora_fits_executable_path', 'fits.sh');
   // Validate path before running derivatives.
-  $errors = islandora_fits_path_check($fits);
+  $errors = islandora_fits_validate_path_to_fits($fits);
   if (!empty($errors)) {
     watchdog('islandora_fits', array_merge($errors), array(),WATCHDOG_WARNING);
     return FALSE;

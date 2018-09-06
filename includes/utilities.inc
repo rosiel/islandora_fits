@@ -15,13 +15,13 @@
  *   Errors encountered executing the file. If it returns an empty array,
  *   then the file was executable.
  */
-function islandora_fits_path_check($path) {
+function islandora_fits_validate_path_to_fits($path) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $allowed_paths = array(
     'fits.sh',
     'fits',
   );
-  $errors = islandora_executable_available_check($path, $allowed_paths);
+  $errors = islandora_validate_path_to_binary($path, $allowed_paths);
 
   // If no errors, try executing it with the -v option.
   if (empty($errors)) {
