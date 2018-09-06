@@ -102,7 +102,13 @@ function islandora_fits_path_ajax($form, $form_state) {
 }
 
 /**
- * Gets a user-friendly message to show whether the path is valid.
+ * Gets a user-friendly message to show if the path to FITS seems valid.
+ *
+ * @param string $fits_path
+ *   Path to a desired executable, or executable string.
+ *
+ * @return string
+ *   An HTML message that can be displayed to the user.
  */
 function islandora_fits_get_fits_path_validation_message($fits_path) {
   module_load_include('inc', 'islandora_fits', '/includes/utilities');
@@ -113,4 +119,29 @@ function islandora_fits_get_fits_path_validation_message($fits_path) {
     $version_string = t("Version: @version", array('@version' => $version));
   }
   return islandora_get_path_validation_markup($errors, $fits_path, $version_string);
+}
+
+/**
+ * Gets a user-friendly message to show whether the path is valid.
+ *
+ * Deprecated; use renamed function
+ * islandora_fits_get_fits_path_validation_message().
+ */
+function islandora_fits_get_path_message($fits_path) {
+  $message = islandora_deprecated('7.x-1.13', t('Please use islandora_fits_get_fits_path_validation_message instead.'));
+  trigger_error(filter_xss($message), E_USER_DEPRECATED);
+  return islandora_fits_get_fits_path_validation_message($fits_path);
+}
+
+/**
+ * Check fits path for an executable.
+ *
+ * Deprecated; use renamed function in utilities.inc,
+ * islandora_fits_validate_path_to_fits($path).
+ */
+function islandora_fits_path_check($path) {
+  $message = islandora_deprecated('7.x-1.13', t('Please use islandora_fits_validate_path_to_fits instead.'));
+  trigger_error(filter_xss($message), E_USER_DEPRECATED);
+  module_load_include('inc', 'islandora_fits','includes/utilities');
+  return islandora_fits_validate_path_to_fits($path);
 }

@@ -6,14 +6,14 @@
  */
 
 /**
- * Checks fits path for an executable.
+ * Validates whether the path to FITS may be executed.
  *
  * @param string $path
  *   Path to a desired executable, or executable string.
  *
  * @return array
  *   Errors encountered executing the file. If it returns an empty array,
- *   then the file was executable.
+ *   then the file was executable and returned a version.
  */
 function islandora_fits_validate_path_to_fits($path) {
   module_load_include('inc', 'islandora', 'includes/utilities');
@@ -28,7 +28,7 @@ function islandora_fits_validate_path_to_fits($path) {
     $command = $path . ' -v';
     exec($command, $output, $return_value);
     if ($return_value !== 0) {
-      $errors[] = t('The command %file is not a valid FITS executable.', array('%file' => $path));
+      $errors[] = t('The path or command %file is not a valid FITS executable.', array('%file' => $path));
     }
   }
   if (!empty($errors)) {
